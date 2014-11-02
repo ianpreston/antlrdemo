@@ -1,0 +1,34 @@
+grammar Hello;
+
+program: (statement SEMICOLON | label)+;
+
+statement
+    : stmt_exec_unary
+    | stmt_exec_binary
+    | stmt_display
+    | stmt_set
+    | stmt_jumpif
+    ;
+
+rvalue: IDENT | CONST;
+
+label: IDENT COLON;
+stmt_exec_unary: 'exec' IDENT IDENT rvalue;
+stmt_exec_binary: 'exec' IDENT IDENT rvalue rvalue;
+stmt_display
+    : 'display' IDENT
+    | 'display' STRING_LITERAL
+    ;
+stmt_set: 'set' IDENT rvalue;
+stmt_jumpif
+    : 'jumpif' INVERT rvalue IDENT
+    | 'jumpif' rvalue IDENT
+    ;
+
+WHITESPACE: [\t\r\n ]+ -> skip;
+SEMICOLON: ';';
+INVERT: 'not';
+COLON: ':';
+CONST: '-'? [0-9]+;
+STRING_LITERAL: '"' (.*?) '"';
+IDENT: ([a-zA-Z]) ([a-zA-Z0-9_]*);
