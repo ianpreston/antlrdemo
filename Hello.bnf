@@ -10,16 +10,26 @@ statement
     | stmt_jumpif
     ;
 
-rvalue: IDENT | CONST;
+lvalue
+    : IDENT
+    | mem
+    ;
+
+rvalue
+    : CONST
+    | lvalue
+    ;
+
+mem: '[' rvalue ']';
 
 label: IDENT COLON;
-stmt_exec_unary: 'exec' IDENT IDENT rvalue;
-stmt_exec_binary: 'exec' IDENT IDENT rvalue rvalue;
+stmt_exec_unary: 'exec' IDENT lvalue rvalue;
+stmt_exec_binary: 'exec' IDENT lvalue rvalue rvalue;
 stmt_display
-    : 'display' IDENT
+    : 'display' rvalue
     | 'display' STRING_LITERAL
     ;
-stmt_set: 'set' IDENT rvalue;
+stmt_set: 'set' lvalue rvalue;
 stmt_jumpif
     : 'jumpif' INVERT rvalue IDENT
     | 'jumpif' rvalue IDENT

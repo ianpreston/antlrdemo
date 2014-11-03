@@ -5,6 +5,11 @@ class Ident(str):
     pass
 
 
+class MemAddr(object):
+    def __init__(self, lvalue):
+        self.lvalue = lvalue
+
+
 class Const(float):
     pass
 
@@ -17,6 +22,7 @@ class Value(float):
     pass
 
 
+
 class Op(object):
     def __init__(self):
         pass
@@ -26,14 +32,14 @@ class Op(object):
 
 
 class SetOp(Op):
-    def __init__(self, ident, value):
+    def __init__(self, lvalue, rvalue):
         super(SetOp, self).__init__()
-        self.ident = ident
-        self.value = value
+        self.lvalue = lvalue
+        self.rvalue = rvalue
 
     def execute(self, program):
-        value = program.resolve(self.value)
-        program.memset(self.ident, self.value)
+        val_resolved = program.resolve(self.rvalue)
+        program.memset(self.lvalue, val_resolved)
 
 
 class DispOp(Op):
@@ -44,13 +50,15 @@ class DispOp(Op):
     def execute(self, program):
         if isinstance(self.arg, Ident):
             print program.memget(self.arg)
+        elif isinstance(self.arg, MemAddr):
+            print program.memget(self.arg)
         elif isinstance(self.arg, StringLiteral):
             print self.arg
 
 
 class ExecOp(Op):
-    def __init__(self, func_name, result_ident, arg0, arg1=None):
-        self.result_ident = result_ident
+    def __init__(self, func_name, result_lvalue, arg0, arg1=None):
+        self.result_lvalue = result_lvalue
         self.func_name = func_name
         self.arg0 = arg0
         self.arg1 = arg1
@@ -69,7 +77,7 @@ class ExecOp(Op):
             result = func(program.resolve(self.arg0))
 
         result = Value(result)
-        program.memset(self.result_ident, result)
+        program.memset(self.result_lvalue, result)
 
 
 class LabelOp(Op):

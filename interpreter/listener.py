@@ -9,50 +9,59 @@ class OpListBuilder(HelloListener):
         self.ops = []
 
     def _handle_exec_stmt(self, ctx):
-        func_name = ctx.IDENT(0).getText()
+        func_name = ctx.IDENT().getText()
 
-        result_ident = ctx.IDENT(1).getText()
-        result_ident = op.Ident(result_ident)
+        result_lvalue = self._handle_lvalue(ctx.lvalue())
 
         try:
-            arg0 = self._handle_rvalue(ctx.rvalue(0))
-            arg1 = self._handle_rvalue(ctx.rvalue(1))
+            rvalue0 = ctx.rvalue(0)
+            rvalue1 = ctx.rvalue(1)
         except TypeError:
-            # ctx.rvalue takes no arguments
             arg0 = self._handle_rvalue(ctx.rvalue())
             arg1 = None
+        else:
+            arg0 = self._handle_rvalue(rvalue0)
+            arg1 = self._handle_rvalue(rvalue1)
 
         return op.ExecOp(
-            result_ident=result_ident,
+            result_lvalue=result_lvalue,
             func_name=func_name,
             arg0=arg0,
             arg1=arg1,
         )
 
     def _handle_rvalue(self, ctx):
-        try:
-            ident = ctx.IDENT().getText()
-            ident = op.Ident(ident)
-            return ident
-        except AttributeError:
-            const = ctx.CONST().getText()
-            const = op.Const(const)
-            return const
+        lvalue = ctx.lvalue()
+        if lvalue:
+            return self._handle_lvalue(lvalue)
+
+        const = ctx.CONST()
+        if const:
+            return op.Const(const.getText())
+
+    def _handle_lvalue(self, ctx):
+        ident = ctx.IDENT()
+        if ident:
+            return op.Ident(ident.getText())
+
+        mem = ctx.mem()
+        if mem:
+            mem_rvalue = self._handle_rvalue(mem.rvalue())
+            return op.MemAddr(mem_rvalue)
 
     def enterStmt_set(self, ctx):
-        ident = ctx.IDENT().getText()
+        lvalue = self._handle_lvalue(ctx.lvalue())
         rvalue = self._handle_rvalue(ctx.rvalue())
 
         no = op.SetOp(
-            ident=op.Ident(ident),
-            value=rvalue,
+            lvalue=lvalue,
+            rvalue=rvalue,
         )
         self.ops.append(no)
 
     def enterStmt_display(self, ctx):
         try:
-            arg = ctx.IDENT().getText()
-            arg = op.Ident(arg)
+            arg = self._handle_rvalue(ctx.rvalue())
         except AttributeError:
             arg = ctx.STRING_LITERAL().getText().strip('"')
             arg = op.StringLiteral(arg)

@@ -1,11 +1,12 @@
+import collections
 import op
 
 
 class Program(object):
     def __init__(self, ops):
-        # The program's "memory." All identifiers are global (there is no
-        # scope). This dict maps Idents to their current Values.
-        self.memory = {}
+        # The program's current "memory" state
+        self.mem_idents = {}
+        self.mem_addrs = collections.defaultdict(op.Value)
 
         # The "compiled" program, represented as a list of Op objects.
         self.ops = ops
@@ -37,27 +38,43 @@ class Program(object):
             current_op.execute(self)
             self.esp += 1
 
-    def memget(self, ident):
+    def _memget_ident(self, ident):
         try:
-            return self.memory[ident]
+            return self.mem_idents[ident]
         except KeyError:
-            raise RuntimeError('Identifier ref before set: {}'.format(ident))
+            raise RuntimeError('Undefined ident: {}'.format(key))
 
-    def memset(self, ident, value):
-        self.memory[ident] = value
+    def _memget_addr(self, addr):
+        res = self.resolve(addr.lvalue)
+        return self.mem_addrs[res]
+
+    def memget(self, key):
+        if isinstance(key, op.Ident):
+            return self._memget_ident(key)
+        elif isinstance(key, op.MemAddr):
+            return self._memget_addr(key)
+
+    def memset(self, key, value):
+        if isinstance(key, op.Ident):
+            self.mem_idents[key] = value
+        elif isinstance(key, op.MemAddr):
+            res = self.resolve(key.lvalue)
+            self.mem_addrs[res] = value
 
     def resolve(self, x):
         """
-        Resolves an Ident or Const to its current Value
+        Resolves an Ident, MemAddr, or Const to its current Value
         """
         if isinstance(x, op.Ident):
+            return self.memget(x)
+        elif isinstance(x, op.MemAddr):
             return self.memget(x)
         elif isinstance(x, op.Const):
             return op.Value(x)
         elif isinstance(x, op.Value):
             return x
         else:
-            raise RuntimeError('Argument to resolve() must be Ident or Const')
+            raise RuntimeError('Invalid argument to resolve(): {}'.format(x))
 
     def jmp(self, label_name):
         try:
