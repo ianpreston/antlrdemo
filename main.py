@@ -2,7 +2,7 @@ import sys
 import antlr4
 from interpreter.parse.HelloParser import HelloParser
 from interpreter.parse.HelloLexer import HelloLexer
-from interpreter.listener import OpListBuilder
+from interpreter.visitor import OpListBuilder
 from interpreter.program import Program
 
 
