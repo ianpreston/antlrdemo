@@ -33,8 +33,7 @@ def main():
     # Walk the parse tree to build a list of Ops (analogous to an abstract
     # syntax tree)
     builder = OpListBuilder()
-    walker = antlr4.ParseTreeWalker()
-    walker.walk(builder, tree)
+    tree.accept(builder)
 
     # Interpret the Op list
     program = Program(builder.ops)
