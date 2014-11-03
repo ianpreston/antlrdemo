@@ -3,8 +3,7 @@ grammar Hello;
 program: (statement SEMICOLON | label)+;
 
 statement
-    : stmt_exec_unary
-    | stmt_exec_binary
+    : stmt_exec
     | stmt_display
     | stmt_set
     | stmt_jumpif
@@ -23,8 +22,7 @@ rvalue
 mem: '[' rvalue ']';
 
 label: IDENT COLON;
-stmt_exec_unary: 'exec' IDENT lvalue rvalue;
-stmt_exec_binary: 'exec' IDENT lvalue rvalue rvalue;
+stmt_exec: 'exec' IDENT lvalue rvalue rvalue?;
 stmt_display
     : 'display' rvalue
     | 'display' STRING_LITERAL

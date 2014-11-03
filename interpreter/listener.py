@@ -52,13 +52,7 @@ class OpListBuilder(HelloVisitor):
         no = op.DispOp(arg)
         self.ops.append(no)
 
-    def visitStmt_exec_unary(self, ctx):
-        self.ops.append(self._handle_exec_stmt(ctx))
-
-    def visitStmt_exec_binary(self, ctx):
-        self.ops.append(self._handle_exec_stmt(ctx))
-
-    def _handle_exec_stmt(self, ctx):
+    def visitStmt_exec(self, ctx):
         func_name = ctx.IDENT().getText()
 
         result_lvalue = ctx.lvalue().accept(self)
@@ -73,12 +67,13 @@ class OpListBuilder(HelloVisitor):
             arg0 = rvalue0.accept(self)
             arg1 = rvalue1.accept(self)
 
-        return op.ExecOp(
+        no = op.ExecOp(
             result_lvalue=result_lvalue,
             func_name=func_name,
             arg0=arg0,
             arg1=arg1,
         )
+        self.ops.append(no)
 
     def visitLabel(self, ctx):
         label_name = ctx.IDENT().getText()
