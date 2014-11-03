@@ -42,7 +42,7 @@ class Program(object):
         try:
             return self.mem_idents[ident]
         except KeyError:
-            raise RuntimeError('Undefined ident: {}'.format(key))
+            raise RuntimeError('Undefined ident: {}'.format(ident))
 
     def _memget_addr(self, addr):
         res = self.resolve(addr.lvalue)
