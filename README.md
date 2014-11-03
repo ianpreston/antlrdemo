@@ -1,10 +1,15 @@
 # antlrdemo
 
-This is a demo implementation of a toy language using the new ANTLR4 Python target.
+This is a minimal interpreter implementation using the new Python target in ANTLR4, for demo/example purposes. Syntactically, the language somewhat resembles assembly language. Examples can be found in the 'examples' directory.
 
-## Run
+## Getting Started
 
-	virtualenv venv && source venv/bin/activate
-	pip install -r requirements.txt
-	make
-	python main.py example.h
+    $ git clone https://github.com/ianpreston/antlrdemo.git && cd antlrdemo
+	$ virtualenv venv && source venv/bin/activate
+	$ pip install -r requirements.txt
+	$ make
+	$ python main.py example.h
+
+## License
+
+`antlrdemo` is under the [WTFPL](http://www.wtfpl.net/txt/copying/).
